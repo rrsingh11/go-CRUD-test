@@ -18,9 +18,12 @@ func (m *InMemory) AddContact(contact *models.Contact) error {
 	return nil
 }
 
-func (m *InMemory) GetContacts() ([]models.Contact, error) {
+type mapData []models.Contact
+func (md mapData) Decodable() {}
+
+func (m *InMemory) GetContacts() (models.Output, error) {
 	m.mu.Lock()
-	cts := make([]models.Contact, 0, len(m.Contacts))
+	cts := make(mapData, 0, len(m.Contacts))
 
 	for ctK, ctV := range m.Contacts {
 		cts = append(cts, models.Contact{Name: ctK, Phone: ctV})

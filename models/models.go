@@ -9,9 +9,13 @@ type Service interface {
 	Check() bool
 }
 
+type Output interface {
+	Decodable()
+}
+
 type ContactBook interface {
 	AddContact(contact *Contact) error
-	GetContacts() ([]Contact, error)
+	GetContacts() (Output, error)
 	DeleteContact(contactName string) error
 	UpdateContact(*Contact) error
 
