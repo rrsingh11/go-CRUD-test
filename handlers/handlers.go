@@ -1,70 +1,93 @@
-package testapi
+package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
-	"sync"
-	"testapi/datastore"
 	"testapi/models"
+	"testapi/services"
+	"testapi/utils"
 )
 
-
 type ContactHandler struct {
-	*sync.Mutex
-	book datastore.ContactBook
+	book models.ContactBook
 }
 
 func (h *ContactHandler) CreateContact(w http.ResponseWriter, r *http.Request) {
 	var c models.Contact
-	decoder := json.NewDecoder(r.Body)
-	err := decoder.Decode(&c)
-	if err != nil {
-		fmt.Println("Error while decoding", err)
+	
+	if err := json.NewDecoder(r.Body).Decode(&c); err != nil {
+		http.Error(w, "Error while decoding", http.StatusInternalServerError)
 		return
 	}
 
-	newErr := h.book.AddContact(&c)
-	if newErr != nil {
-		fmt.Fprintln(w, "Trouble storing data")
+	if ok := services.NewValidationSevice(c.Phone).Check(); !ok {
+		http.Error(w, "Wrong Phone Number", http.StatusBadRequest)
 		return
 	}
-	fmt.Fprintf(w, "Contact added Successfully")
+
+
+	newErr := h.book.AddContact(&c)
+
+
+	if newErr != nil {
+		http.Error(w, "Error storing data", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write(utils.EncodeMessage("Contact created"))
 }
 
 func (h *ContactHandler) GetAllContacts(w http.ResponseWriter, r *http.Request) {
 	cts, _ := h.book.GetContacts()
 	jsonBytes, _ := json.Marshal(cts)
+
+	w.WriteHeader(http.StatusOK)
 	w.Write(jsonBytes)
 }
 
 func (h *ContactHandler) DeleteContact(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query()
 	c := q.Get("number")
+
 	newErr := h.book.DeleteContact(c)
-	if newErr != nil {
-		fmt.Fprintln(w, "Trouble deleting data")
+
+	if ok := services.NewValidationSevice(c).Check(); !ok {
+		http.Error(w, "Wrong Phone Number", http.StatusBadRequest)
 		return
 	}
-	fmt.Fprintln(w, "Contact deleted Successfully")
+
+	
+	if newErr != nil {
+		http.Error(w, "Error deleting Data", http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	w.Write(utils.EncodeMessage("Contact Deleted successfully"))
 }
 
 func (h *ContactHandler) UpdateContact(w http.ResponseWriter, r *http.Request) {
 	var c models.Contact
-	decoder := json.NewDecoder(r.Body)
-	err := decoder.Decode(&c)
-	if err != nil {
-		fmt.Println("Error while decoding", err)
+	if err := json.NewDecoder(r.Body).Decode(&c); err != nil {
+		http.Error(w, "Error while decoding", http.StatusInternalServerError)
 		return
 	}
 
-	newErr := h.book.UpdateContact(&c)
-	if newErr != nil {
-		fmt.Fprintln(w, "Trouble updating data")
+	if ok := services.NewValidationSevice(c.Phone).Check(); !ok {
+		http.Error(w, "Wrong Phone Number", http.StatusBadRequest)
 		return
 	}
-	fmt.Fprintf(w, "Contact Updated Successfully")
+
+
+	if updateErr := h.book.UpdateContact(&c); updateErr != nil {
+		http.Error(w, "Error updating Data", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write(utils.EncodeMessage("Contact Updated successfully"))
 }
+
 
 func (h *ContactHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json")
@@ -88,12 +111,12 @@ func (h *ContactHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 
 
-
-func NewHandler() ContactHandler {
-	return ContactHandler{
-		book: &datastore.InMemory{
-			Contacts: make(map[string]string),
-			Mutex: &sync.Mutex{},
-		},
+// Dependency Injection
+func NewContactHandler(book models.ContactBook) *ContactHandler {
+	return &ContactHandler{
+		book: book,
 	}
 }
+
+
+

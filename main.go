@@ -5,11 +5,9 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"testapi/datastore"
 	"testapi/handlers"
 )
-
-
-
 
 
 func main() {
@@ -17,8 +15,8 @@ func main() {
 	flag.Parse()
 	mux := http.NewServeMux()
 
-	h := testapi.NewHandler()
-	mux.Handle("/api/contact", &h)
+	h := handlers.NewContactHandler(&datastore.InMemory{ Contacts: make(map[string]string) })
+	mux.Handle("/api/contact", h)
 
 	fmt.Println("Starting server at :", *port)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", *port), mux))
