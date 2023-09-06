@@ -17,36 +17,33 @@ func (m *MongoDB) AddContact(contact *models.Contact) error {
 	_, err := m.Collection.InsertOne(context.Background(), contact)
 
 	if err != nil {
-		return fmt.Errorf("error while inserting")
+		return err
 	}
 	return nil
 }
 
-type bsonData []bson.D
-
-func (d bsonData) Decodable() {}
-
-func (m *MongoDB) GetContacts() (models.Output, error) {
+func (m *MongoDB) GetContacts() ([]models.Contact, error) {
 	cursor, err := m.Collection.Find(context.Background(), bson.D{})
-	// defer cursor.Close(context.Background())
-
 	if err != nil {
-		return make(bsonData, 0), fmt.Errorf("error while fetching contacts")
+		return make([]models.Contact, 0), fmt.Errorf("error while fetching contacts")
 	}
-
-	var contacts bsonData
+	var contacts []models.Contact
 
 	if err := cursor.All(context.TODO(), &contacts); err != nil {
-		panic(err)
+		return contacts, err
+	} else if len(contacts) == 0 {
+		return contacts, models.ErrNotFound
 	}
 	return contacts, nil
 }
 
 func (m *MongoDB) DeleteContact(contactNumber string) error {
 	filter := bson.M{"phone": contactNumber}
-	_, err := m.Collection.DeleteOne(context.Background(), filter)
+	res, err := m.Collection.DeleteOne(context.Background(), filter)
 	if err != nil {
 		return err
+	} else if res.DeletedCount == 0 {
+		return models.ErrNotFound
 	}
 	return nil
 }
@@ -55,11 +52,26 @@ func (m *MongoDB) UpdateContact(contact *models.Contact) error {
 	filter := bson.M{"name": contact.Name}
 	update := bson.D{{Key: "$set", Value: bson.M{"phone": contact.Phone}}}
 
-	_, err := m.Collection.UpdateOne(context.Background(), filter, update)
+	res, err := m.Collection.UpdateOne(context.Background(), filter, update)
+	if err != nil {
+		return err
+	} else if res.MatchedCount == 0 {
+		return models.ErrNotFound
+	}
+
+	return nil
+}
+
+func (m *MongoDB) InsertManyContacts(contacts []models.Contact) error {
+	var cts []interface{}
+	for _, contact := range contacts {
+		cts = append(cts, contact)
+	}
+
+	_, err := m.Collection.InsertMany(context.Background(), cts)
 
 	if err != nil {
 		return err
 	}
-
 	return nil
 }

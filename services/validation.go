@@ -1,19 +1,17 @@
 package services
 
-import "testapi/models"
 
-
-type IsValidPhoneNumber struct {
-	phoneNumber string
+type ValidationService struct {
+	noOfDigits int
 }
 
 
-func NewValidationSevice(ph string) models.Service{
-	return &IsValidPhoneNumber{
-		phoneNumber: ph,
+func NewValidationSevice(d int) *ValidationService{
+	return &ValidationService{
+		noOfDigits: d,
 	}
 }
 
-func (s *IsValidPhoneNumber) Check() bool {
-	return len(s.phoneNumber) == 10
+func (s *ValidationService) Check(phoneNumber string) bool {
+	return len(phoneNumber) == s.noOfDigits
 }

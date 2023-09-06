@@ -15,8 +15,6 @@ func ConnectMongoDB(db string, collectionName string) *mongo.Collection {
 	if err != nil {
 		panic(err)
 	}
-	
 	collection := client.Database(db).Collection(collectionName)
-
 	return collection
 }

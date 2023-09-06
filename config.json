@@ -1,0 +1,10 @@
+{
+    "memory": {
+        "type": "mongodb",
+        "database": "contact_book",
+        "collection": "contacts"
+    },
+    "host": "localhost",
+    "port": 2969
+}
+
