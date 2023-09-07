@@ -1,6 +1,6 @@
 {
     "memory": {
-        "type": "mongodb",
+        "type": "redis",
         "database": "contact_book",
         "collection": "contacts"
     },

@@ -21,14 +21,7 @@ type Service interface {
 }
 
 // Database port
-//go:generate mockgen -destination=../mocks/datastore/mockContactBook.go -package=datastore  testapi/datastore ContactBook
-type ContactBook interface {
-	AddContact(contact *Contact) error
-	GetContacts() ([]Contact, error)
-	DeleteContact(contactName string) error
-	UpdateContact(*Contact) error
-	InsertManyContacts([]Contact) error
-}
+
 
 type Config struct {
 	Memory struct {

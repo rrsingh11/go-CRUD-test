@@ -30,7 +30,7 @@ func (h *ContactHandler) PostRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Write(utils.EncodeMessage(models.Reponse{
-		Message: "Deleted Successfully", 
+		Message: "Added Successfully", 
 		Code: "S",
 		Status: "success",
 	}))

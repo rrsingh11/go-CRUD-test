@@ -3,16 +3,17 @@ package services
 import (
 	"fmt"
 	"io"
+	"testapi/datastore"
 	"testapi/models"
 	"testapi/utils"
 )
 
 type ContactService struct {
-	store         models.ContactBook
+	store         datastore.ContactBook
 	validationSvc ValidationService
 }
 
-func NewContactService(store models.ContactBook, vs ValidationService) *ContactService {
+func NewContactService(store datastore.ContactBook, vs ValidationService) *ContactService {
 
 	return &ContactService{
 		store:         store,
@@ -85,7 +86,7 @@ func (cs *ContactService) AddBulkContacts(file io.Reader) error {
 		}
 	}
 
-	if len(errInvalidContact) > 0 {
+	if len(errInvalidContact) > 10 {
 		return fmt.Errorf(errInvalidContact)
 	}
 

@@ -8,7 +8,6 @@ import (
 	"os"
 	"testapi/datastore"
 	"testapi/handlers"
-	"testapi/models"
 	"testapi/services"
 	"testapi/utils"
 )
@@ -24,7 +23,7 @@ func main() {
 	port := flag.Int("port", config.Port, "Write the port name")
 	flag.Parse()
 
-	var store models.ContactBook
+	var store datastore.ContactBook
 
 	switch config.Memory.Type {
 	case "mongodb":
@@ -32,6 +31,9 @@ func main() {
 		store = &datastore.MongoDB{Collection: mongoCollection}
 	case "inmemory":
 		store = &datastore.InMemory{Contacts: make(map[string]string)}
+	case "redis":
+		redisClient := utils.ConnectRedis("localhost", "6379")
+		store = &datastore.Redis{Client: *redisClient}
 	}
 
 	infoLogger := log.New(os.Stdout, "INFO:", 1)
@@ -57,4 +59,3 @@ func main() {
 	fmt.Println("Starting server at :", *port)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf("%s:%d", config.Host, *port), mux))
 }
-
