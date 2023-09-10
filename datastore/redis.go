@@ -37,11 +37,24 @@ func (r Redis) GetContacts() ([]models.Contact, error) {
 }
 
 func (r Redis) DeleteContact(contactNumber string) error {
-	err := r.Client.HDel("contacts", contactNumber).Err()
+	// db call
+	cts, nil := r.GetContacts()
+	var key string
+	// linear search the contact 
+	for _, ct := range cts{
+		if ct.Phone == contactNumber {
+			key = ct.Name
+			break
+		}
+	}
+
+	err := r.Client.HDel("contacts", key).Err()
 
 	if err != nil {
 		return err
 	}
+
+
 
 	return nil
 }
