@@ -31,6 +31,11 @@ type Config struct {
 	} `json:"memory"`
 	Host string `json:"host"`
 	Port int    `json:"port"`
+	Test_Memory struct { 
+		Type       string `json:"type"`
+		Database   string `json:"database"`
+		Collection string `json:"collection"`
+	} `json:"test-memory"` 
 }
 
 type Reponse struct {

@@ -1,11 +1,10 @@
-package services
+package tests
 
 import (
 	mock_datastore "testapi/mocks/datastore"
 	"testapi/models"
 	"testapi/services"
 	"testing"
-
 	"github.com/golang/mock/gomock"
 )
 

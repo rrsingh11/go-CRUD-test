@@ -5,6 +5,12 @@
         "collection": "contacts"
     },
     "host": "localhost",
-    "port": 2969
+    "port": 2969,
+    "test-memory": {
+        "type": "mongodb",
+        "database": "test_contact_book",
+        "collection": "contacts"
+    }
+
 }
 
