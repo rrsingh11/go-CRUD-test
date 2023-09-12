@@ -50,7 +50,7 @@ func Test_GetAllContacts(t *testing.T) {
 
 	mockStore := mock_datastore.NewMockContactBook(ctrl)
 
-	mockStore.EXPECT().GetContacts().Return(nil, nil)
+	mockStore.EXPECT().GetContacts().Return([]models.Contact{models.Contact{Name: "sample", Phone: "99999999"}}, nil)
 	vs := services.NewValidationSevice(10)
 
 	// Act
